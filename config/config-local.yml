@@ -1,0 +1,18 @@
+Server:
+  Port: 8080
+  ReadTimeout: 5
+  WriteTimeout: 5
+  GineMode: debug
+
+Database:
+  Host: localhost
+  Port: 5432
+  Name: employee_leave_management_system
+  User: postgres
+  Password: pass123
+  # MigrationPath: migration/scripts
+
+Logger:
+  Level: debug
+
+
