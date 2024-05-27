@@ -2,7 +2,7 @@ package constants
 
 const (
 	UpdateLeaveEndPoint = "/update"
-	DetailEndPoint = "/detail"
+	// DetailEndPoint = "/detail"
 	DeleteLeaveEndPoint = "/delete"
 	InsertLeaveEndPoint = "/insert"
 	LeaveDetailsEndPoint = "/leave_detail"

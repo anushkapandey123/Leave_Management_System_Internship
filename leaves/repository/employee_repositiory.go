@@ -4,7 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	
+	"reflect"
+
+	// "fmt"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -22,24 +25,24 @@ func NewEmployeeRepository(db *gorm.DB) *employeeRepository {
 	}
 }
 
-func (repo employeeRepository) FindByUserId(ctx context.Context) (*[]model.Emp, error) {
-	var employee []model.Emp
+// func (repo employeeRepository) FindByUserId(ctx context.Context) (*[]model.Emp, error) {
+// 	var employee []model.Emp
 
-	// db := repo.WithContext(ctx)
-	// defer cancel()
+// 	// db := repo.WithContext(ctx)
+// 	// defer cancel()
 
-	if result := repo.db.Find(&employee); result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return &[]model.Emp{}, nil
-		}
-		// return &model.Emp{}, ae.InternalServerError("InternalServerError","something went wrong",
-		// 	fmt.Errorf("something went wrong %v", result.Error))
+// 	if result := repo.db.Find(&employee); result.Error != nil {
+// 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+// 			return &[]model.Emp{}, nil
+// 		}
+// 		// return &model.Emp{}, ae.InternalServerError("InternalServerError","something went wrong",
+// 		// 	fmt.Errorf("something went wrong %v", result.Error))
 
-		return &[]model.Emp{}, errors.New("error occured")
-	}
+// 		return &[]model.Emp{}, errors.New("error occured")
+// 	}
 
-	return &employee, nil
-}
+// 	return &employee, nil
+// }
 
 func (repo employeeRepository) FetchLeavesByEmpId(ctx context.Context) (*[]model.Leave, error) {
 	var leave []model.Leave
@@ -58,7 +61,6 @@ func (repo employeeRepository) FetchLeavesByEmpId(ctx context.Context) (*[]model
 
 func (repo employeeRepository) Create(ctx context.Context, c *model.Leave) error {
 	dbCtx := repo.db.WithContext(ctx)
-	fmt.Println(c)
 	result := dbCtx.Clauses(clause.OnConflict{DoNothing: true}).Create(c)
 
 	if result.Error != nil {
@@ -73,23 +75,51 @@ func (repo employeeRepository) Create(ctx context.Context, c *model.Leave) error
 	return nil
 }
 
-// func (repo employeeRepository) DeleteByStartDate(ctx context.Context, c *model.Leave) error {
+func (repo employeeRepository) FindLeave(ctx context.Context, sdate time.Time, edate time.Time) (bool, error) {
+
+	var leave model.Leave
+
+	if result := repo.db.Where("start_date = ?", sdate).Where("end_date = ?", edate).Find(&leave); result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+
+		return false, errors.New("some error occurred")
+
+	}
+
+	fmt.Println("in repo : ")
+
+	var emptyLeave model.Leave
+
+	fmt.Println(leave)
+
+	if reflect.DeepEqual(leave, emptyLeave)  {
+		return false, errors.New("some error occurred")
+	}
+
+	return true, nil
+}
+
+func (repo employeeRepository) Delete(ctx context.Context, c *model.Leave, sdate time.Time, edate time.Time) error {
 	
-// 	dbCtx := repo.db.WithContext(ctx)
-// 	result := dbCtx.Clauses(clause.OnConflict{DoNothing: true}).Delete(c)
+	dbCtx := repo.db.WithContext(ctx)
+	result := dbCtx.Clauses(clause.OnConflict{DoNothing: true}).Where("start_date = ?", sdate).Where("end_date = ?", edate).Delete(c)
+	
+	
 
-// 	if result.Error != nil {
-// 		// return ae.UnProcessableError("CustomerCreationFailed", "Customer creation failed due to unknown reason", result.Error)
-// 		return errors.New("error occured")
-// 	}
+	if result.Error != nil {
+		// return ae.UnProcessableError("CustomerCreationFailed", "Customer creation failed due to unknown reason", result.Error)
+		return errors.New("error occured")
+	}
 
-// 	if result.RowsAffected == 0 {
-// 		// return ae.UnProcessableError("CustomerAlreadyExist", "Customer already exist. Duplicate record", nil)
-// 		return errors.New("error occurred, duplicate records")
-// 	}
-// 	return nil
+	if result.RowsAffected == 0 {
+		// return ae.UnProcessableError("CustomerAlreadyExist", "Customer already exist. Duplicate record", nil)
+		return errors.New("error occurred, duplicate records")
+	}
+	return nil
 
 
-// }
+}
 
 

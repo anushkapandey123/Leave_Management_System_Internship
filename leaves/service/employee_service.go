@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"reflect"
 	"time"
@@ -12,10 +13,12 @@ import (
 )
 
 type EmployeeRepository interface {
-	FindByUserId(context.Context) (*[]model.Emp, error)
+	// FindByUserId(context.Context) (*[]model.Emp, error)
 	Create(context.Context, *model.Leave) error
 	FetchLeavesByEmpId(context.Context) (*[]model.Leave, error)
-	// FindByStartDate(context.Context, time.Time) error
+	FindLeave(context.Context, time.Time, time.Time) (bool, error)
+	Delete(context.Context, *model.Leave, time.Time, time.Time) (error)
+	
 }
 
 type employeeService struct {
@@ -28,23 +31,7 @@ func NewEmployeeService(emprepo EmployeeRepository) *employeeService {
 	}
 }
 
-func (c *employeeService) EmployeeDetails(ctx context.Context) (*[]model.Emp, error) {
-	employee, err := c.empRepo.FindByUserId(ctx)
-	if err != nil {
-		// return nil, ae.InternalServerError("Something went wrong", " ", fmt.Errorf("%v", err))
-		return nil, errors.New("error occured")
-	}
 
-	emptyEmployee := []model.Emp{}
-
-	if err == nil && reflect.DeepEqual(employee, emptyEmployee) {
-		err := errors.New("user does not exist")
-		// return nil, ae.BadRequestError("Bad request error", " ", fmt.Errorf("%v", err))
-		return nil, err
-	}
-
-	return employee, nil
-}
 
 func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest request.LeaveRequest) error {
 	sd := newLeaveRequest.StartDate
@@ -54,9 +41,13 @@ func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest reque
 	sdate, _ := time.Parse(layout, sd)
 	edate, _ := time.Parse(layout, ed)
 
-	if edate.Before(sdate) {
-		return errors.New("bad request")
+	if !ValidateLeaveRequest(sdate, edate) {
+		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
 	}
+
+
+
+	
 	leave := model.Leave{EmpId: newLeaveRequest.Id, StartDate: sdate, EndDate: edate}
 	err1 := c.empRepo.Create(ctx, &leave)
 	if err1 != nil {
@@ -88,17 +79,47 @@ func (c *employeeService) LeaveDetailsOfMembers(ctx context.Context) (*[]model.L
 
 }
 
-// func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest request.DeleteLeaveRequest) error {
-// 	sd := newDeleteLeaveRequest.StartDate
-// 	layout := "2006-01-02"
-// 	sdate, _ := time.Parse(layout, sd)
+func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest request.DeleteLeaveRequest) error {
+	sd := newDeleteLeaveRequest.StartDate
+	ed := newDeleteLeaveRequest.EndDate
+	layout := "2006-01-02"
+	sdate, _ := time.Parse(layout, sd)
+	edate, _ := time.Parse(layout, ed)
 
-// 	err1 := c.empRepo.FindByStartDate(ctx, sdate)
+	if !ValidateLeaveRequest(sdate, edate) {
+		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
+	}
 
-// 	if err1 != nil {
-// 		return err1
-// 	}
 
-// 	return nil
 
-// }
+	
+
+	res , err := c.empRepo.FindLeave(ctx, sdate, edate)
+	fmt.Println(res)
+
+	leave := model.Leave{}
+
+	if err != nil {
+		return err
+	}
+
+	if res == true {
+
+		err := c.empRepo.Delete(ctx, &leave, sdate, edate)
+
+		if err != nil {
+			return err
+		}
+
+	}
+
+	
+	
+	return nil
+
+}
+
+func ValidateLeaveRequest(start_date time.Time, end_date time.Time) (bool) {
+
+	return !end_date.Before(start_date)
+}

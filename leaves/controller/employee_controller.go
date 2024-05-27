@@ -12,10 +12,10 @@ import (
 )
 
 type EmployeeService interface {
-	EmployeeDetails(context.Context) (*[]model.Emp, error)
+	// EmployeeDetails(context.Context) (*[]model.Emp, error)
 	InsertLeave(context.Context, request.LeaveRequest) error
 	LeaveDetailsOfMembers(context.Context) (*[]model.Leave, error)
-	// DeleteLeave(context.Context, request.DeleteLeaveRequest) error
+	DeleteLeave(context.Context, request.DeleteLeaveRequest) error
 }
 
 type EmployeeController struct {
@@ -28,27 +28,7 @@ func NewEmployeeController(empservice EmployeeService) *EmployeeController {
 	}
 }
 
-// detail
-func (ec *EmployeeController) Detail(c *gin.Context) {
-	// username, _, _ := c.Request.BasicAuth()
-	// user, err := ec.userService.UserDetails(c.Request.Context(), username) // get user details
-	// if err != nil {
-	// 	appError := err.(*ae.AppError)
-	// 	c.AbortWithStatusJSON(appError.HTTPCode(), appError)
-	// 	return
-	// }
 
-	employee, _ := ec.employeeService.EmployeeDetails(c.Request.Context()) // get customer detail
-	// if resError != nil {
-	// 	appError := resError.(*ae.AppError)
-	// 	c.AbortWithStatusJSON(appError.HTTPCode(), appError)
-	// 	return
-	// }
-
-	c.JSON(http.StatusOK, *employee)
-	// fmt.Println("anushka")
-	// c.JSON(http.StatusOK, "hello")
-}
 
 func (ec *EmployeeController) Insert(c *gin.Context) {
 	var newLeaveRequest request.LeaveRequest
@@ -85,24 +65,24 @@ func (ec *EmployeeController) LeaveDetails(c *gin.Context) {
 
 }
 
-// func (ec *EmployeeController) Delete(c *gin.Context) {
-// 	var newDeleteLeaveRequest request.DeleteLeaveRequest
+func (ec *EmployeeController) Delete(c *gin.Context) {
+	var newDeleteLeaveRequest request.DeleteLeaveRequest
 
-// 	if err := c.BindJSON(&newDeleteLeaveRequest); err != nil {
-// 		errors.New("error occured, bad request")
-// 		return
-// 	}
+	if err := c.BindJSON(&newDeleteLeaveRequest); err != nil {
+		errors.New("error occured, bad request")
+		return
+	}
 
-// 	responseError := ec.employeeService.DeleteLeave(c.Request.Context(), newDeleteLeaveRequest)
+	responseError := ec.employeeService.DeleteLeave(c.Request.Context(), newDeleteLeaveRequest)
 
-// 	if responseError != nil {
-// 		// logger.Error("error occurred. %v", responseError)
-// 		// err := responseError.(*ae.AppError)
-// 		// logger.Error("error occurred. %v", err)
-// 		// c.AbortWithStatusJSON(err.HTTPCode(), err)
-// 		errors.New("deletion failed")
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, "Leave Deletion Successful")
+	if responseError != nil {
+		// logger.Error("error occurred. %v", responseError)
+		// err := responseError.(*ae.AppError)
+		// logger.Error("error occurred. %v", err)
+		// c.AbortWithStatusJSON(err.HTTPCode(), err)
+		errors.New("deletion failed")
+		return
+	}
+	c.JSON(http.StatusOK, "Leave Deletion Successful")
 
-// }
+}

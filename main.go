@@ -88,13 +88,13 @@ func main() {
 	db.AutoMigrate(&model.Emp{})
 	db.AutoMigrate(&model.Leave{})
 
-	fmt.Println(db.Migrator().CurrentDatabase())
+	// fmt.Println(db.Migrator().CurrentDatabase())
 
-	fmt.Println(db.Migrator().HasTable(&model.Emp{}))
+	// fmt.Println(db.Migrator().HasTable(&model.Emp{}))
 
 	// db.Migrator().DropTable("emptable")
 
-	fmt.Println(db.Migrator().HasTable(&model.Emp{}))
+	// fmt.Println(db.Migrator().HasTable(&model.Emp{}))
 
 	
 	
@@ -106,11 +106,13 @@ func main() {
 	employeeController := controller.NewEmployeeController(employeeService)
 
 	// router.HandleFunc("/details", employeeController.Detail).Methods("GET")
-	router.GET(constants.DetailEndPoint, employeeController.Detail)
+	// router.GET(constants.DetailEndPoint, employeeController.Detail)
 
 	router.POST(constants.InsertLeaveEndPoint, employeeController.Insert)
 
 	router.GET(constants.LeaveDetailsEndPoint, employeeController.LeaveDetails)
+
+	router.POST(constants.DeleteLeaveEndPoint, employeeController.Delete)
 	
 	// Run the server
 	err = router.Run("localhost:8080")
