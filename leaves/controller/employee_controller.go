@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"errors"
+	"fmt"
+
 	// "fmt"
 	"net/http"
 
@@ -33,10 +35,14 @@ func NewEmployeeController(empservice EmployeeService) *EmployeeController {
 func (ec *EmployeeController) Insert(c *gin.Context) {
 	var newLeaveRequest request.LeaveRequest
 
+	fmt.Println("inside controller")
+
 	if err := c.BindJSON(&newLeaveRequest); err != nil {
 		errors.New("error occured, bad request")
-		return
+		c.AbortWithStatus(404)
 	}
+
+	fmt.Println(newLeaveRequest)
 
 	responseError := ec.employeeService.InsertLeave(c.Request.Context(), newLeaveRequest)
 
@@ -46,7 +52,7 @@ func (ec *EmployeeController) Insert(c *gin.Context) {
 		// logger.Error("error occurred. %v", err)
 		// c.AbortWithStatusJSON(err.HTTPCode(), err)
 		errors.New("insertion failed")
-		return
+		c.AbortWithStatus(404)
 
 	}
 	c.JSON(http.StatusOK, "Leave Insertion Successful")
@@ -81,7 +87,7 @@ func (ec *EmployeeController) Delete(c *gin.Context) {
 		// logger.Error("error occurred. %v", err)
 		// c.AbortWithStatusJSON(err.HTTPCode(), err)
 		errors.New("deletion failed")
-		return
+		c.AbortWithStatus(404)
 	}
 	c.JSON(http.StatusOK, "Leave Deletion Successful")
 

@@ -4,8 +4,8 @@ import "time"
 
 type Leave struct {
 	EmpId     int       `json:"empid"`
-	StartDate time.Time `json:"startdate"`
-	EndDate   time.Time `json:"enddate"`
+	StartDate time.Time `json:"startdate" gorm:"type:date"`
+	EndDate   time.Time `json:"enddate" gorm:"type:date"`
 }
 
 func NewLeave(sd time.Time, ed time.Time) Leave {

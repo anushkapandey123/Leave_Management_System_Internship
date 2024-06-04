@@ -1,11 +1,11 @@
 package config
 
-import (
-	"fmt"
-	"os"
+// import (
+// 	// "fmt"
+// 	"os"
 
-	"github.com/spf13/viper"
-)
+// 	// "github.com/spf13/viper"
+// )
 
 type AppConfig struct {
 	Server         ServerConfig
@@ -37,22 +37,22 @@ type LoggerConfig struct {
 	Level string
 }
 
-func LoadConfig(configFile string) (AppConfig, error) {
-	viper.SetConfigFile(configFile)
-	viper.AutomaticEnv()
+// func LoadConfig(configFile string) (AppConfig, error) {
+// 	viper.SetConfigFile(configFile)
+// 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		return AppConfig{}, fmt.Errorf("failed to load the config: %w", err)
-	}
+// 	if err := viper.ReadInConfig(); err != nil {
+// 		return AppConfig{}, fmt.Errorf("failed to load the config: %w", err)
+// 	}
 
-	for _, k := range viper.AllKeys() {
-		v := viper.GetString(k)
-		viper.Set(k, os.ExpandEnv(v))
-	}
+// 	for _, k := range viper.AllKeys() {
+// 		v := viper.GetString(k)
+// 		viper.Set(k, os.ExpandEnv(v))
+// 	}
 
-	var c AppConfig
-	if err := viper.Unmarshal(&c); err != nil {
-		return AppConfig{}, fmt.Errorf("failed to parse the config. %w", err)
-	}
-	return c, nil
-}
+// 	var c AppConfig
+// 	if err := viper.Unmarshal(&c); err != nil {
+// 		return AppConfig{}, fmt.Errorf("failed to parse the config. %w", err)
+// 	}
+// 	return c, nil
+// }

@@ -75,11 +75,11 @@ func (repo employeeRepository) Create(ctx context.Context, c *model.Leave) error
 	return nil
 }
 
-func (repo employeeRepository) FindLeave(ctx context.Context, sdate time.Time, edate time.Time) (bool, error) {
+func (repo employeeRepository) FindLeave(ctx context.Context, empid int, sdate time.Time, edate time.Time) (bool, error) {
 
 	var leave model.Leave
 
-	if result := repo.db.Where("start_date = ?", sdate).Where("end_date = ?", edate).Find(&leave); result.Error != nil {
+	if result := repo.db.Where("start_date = ?", sdate).Where("end_date = ?", edate).Where("emp_id = ?", empid).Find(&leave); result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, nil
 		}

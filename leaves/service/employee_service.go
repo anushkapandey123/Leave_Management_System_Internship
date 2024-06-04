@@ -16,7 +16,7 @@ type EmployeeRepository interface {
 	// FindByUserId(context.Context) (*[]model.Emp, error)
 	Create(context.Context, *model.Leave) error
 	FetchLeavesByEmpId(context.Context) (*[]model.Leave, error)
-	FindLeave(context.Context, time.Time, time.Time) (bool, error)
+	FindLeave(context.Context, int, time.Time, time.Time) (bool, error)
 	Delete(context.Context, *model.Leave, time.Time, time.Time) (error)
 	
 }
@@ -47,7 +47,6 @@ func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest reque
 
 
 
-	
 	leave := model.Leave{EmpId: newLeaveRequest.Id, StartDate: sdate, EndDate: edate}
 	err1 := c.empRepo.Create(ctx, &leave)
 	if err1 != nil {
@@ -56,6 +55,7 @@ func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest reque
 	}
 	return nil
 }
+
 
 func (c *employeeService) LeaveDetailsOfMembers(ctx context.Context) (*[]model.Leave, error) {
 	leave, err := c.empRepo.FetchLeavesByEmpId(ctx)
@@ -82,6 +82,7 @@ func (c *employeeService) LeaveDetailsOfMembers(ctx context.Context) (*[]model.L
 func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest request.DeleteLeaveRequest) error {
 	sd := newDeleteLeaveRequest.StartDate
 	ed := newDeleteLeaveRequest.EndDate
+	empId := newDeleteLeaveRequest.Id
 	layout := "2006-01-02"
 	sdate, _ := time.Parse(layout, sd)
 	edate, _ := time.Parse(layout, ed)
@@ -94,7 +95,7 @@ func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest
 
 	
 
-	res , err := c.empRepo.FindLeave(ctx, sdate, edate)
+	res , err := c.empRepo.FindLeave(ctx, empId, sdate, edate)
 	fmt.Println(res)
 
 	leave := model.Leave{}
@@ -115,7 +116,7 @@ func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest
 
 	
 	
-	return nil
+	return err
 
 }
 

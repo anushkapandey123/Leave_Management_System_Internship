@@ -16,6 +16,7 @@ import (
 	"main.go/leaves/model"
 	"main.go/leaves/repository"
 	"main.go/leaves/service"
+	"github.com/gin-contrib/cors"
 	// "main.go/app/server"
 	// "main.go/config"
 	// "main.go/integration_test/db"
@@ -71,10 +72,12 @@ var db *gorm.DB
 func main() {
     // Initialize Gin router
     router := gin.Default()
+
+	router.Use(cors.Default())
 	
 
 	// Initialize database connection
-	dsn := "host=localhost user=postgres password=pass123 dbname=employee_leave_management_system port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := "host=localhost user=postgres password=pass123 dbname=employee_leave_management_system port=5432 sslmode=disable"
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -84,17 +87,10 @@ func main() {
 	fmt.Println("Database connection established")
 	fmt.Println("in main :", db)
 
-	// Auto migrate the User model
 	db.AutoMigrate(&model.Emp{})
 	db.AutoMigrate(&model.Leave{})
 
-	// fmt.Println(db.Migrator().CurrentDatabase())
-
-	// fmt.Println(db.Migrator().HasTable(&model.Emp{}))
-
-	// db.Migrator().DropTable("emptable")
-
-	// fmt.Println(db.Migrator().HasTable(&model.Emp{}))
+	
 
 	
 	
@@ -105,8 +101,7 @@ func main() {
 
 	employeeController := controller.NewEmployeeController(employeeService)
 
-	// router.HandleFunc("/details", employeeController.Detail).Methods("GET")
-	// router.GET(constants.DetailEndPoint, employeeController.Detail)
+	
 
 	router.POST(constants.InsertLeaveEndPoint, employeeController.Insert)
 
