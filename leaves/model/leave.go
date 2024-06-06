@@ -4,14 +4,19 @@ import "time"
 
 type Leave struct {
 	EmpId     int       `json:"empid"`
+	Name 	  string 	`json:"name"`
 	StartDate time.Time `json:"startdate" gorm:"type:date"`
 	EndDate   time.Time `json:"enddate" gorm:"type:date"`
+	LeaveType string	`json:"leavetype"`
+	PaidLeavesRemaining int	`json:"remaining_paid_leaves"`
+	CasualLeavesRemaining int `json:"remaining_casual_leaves"`
 }
 
-func NewLeave(sd time.Time, ed time.Time) Leave {
+func NewLeave(sd time.Time, ed time.Time, lt string) Leave {
 	return Leave{
 		StartDate: sd,
 		EndDate:   ed,
+		LeaveType: lt,
 	}
 }
 

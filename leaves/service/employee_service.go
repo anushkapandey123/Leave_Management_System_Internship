@@ -13,11 +13,13 @@ import (
 )
 
 type EmployeeRepository interface {
-	// FindByUserId(context.Context) (*[]model.Emp, error)
+	FindNameByUserId(context.Context, int) (model.Emp, error)
 	Create(context.Context, *model.Leave) error
 	FetchLeavesByEmpId(context.Context) (*[]model.Leave, error)
 	FindLeave(context.Context, int, time.Time, time.Time) (bool, error)
 	Delete(context.Context, *model.Leave, time.Time, time.Time) (error)
+	// FindLeaveInARange(context.Context, int, time.Time, time.Time) (bool, error)
+
 	
 }
 
@@ -45,9 +47,25 @@ func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest reque
 		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
 	}
 
+	res , err := c.empRepo.FindLeave(ctx, newLeaveRequest.Id, sdate, edate)
 
+	fmt.Println(res)
 
-	leave := model.Leave{EmpId: newLeaveRequest.Id, StartDate: sdate, EndDate: edate}
+	if err != nil {
+		return err
+	}
+
+	if res == true {
+
+		return errors.New("leave record already exists")
+	}
+
+	emp, _ := c.empRepo.FindNameByUserId(ctx, newLeaveRequest.Id);
+	name := emp.Name;
+
+	
+
+	leave := model.Leave{EmpId: newLeaveRequest.Id, Name: name, StartDate: sdate, EndDate: edate, LeaveType: newLeaveRequest.LeaveType, PaidLeavesRemaining: 0, CasualLeavesRemaining: 0}
 	err1 := c.empRepo.Create(ctx, &leave)
 	if err1 != nil {
 

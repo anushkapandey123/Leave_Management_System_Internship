@@ -63,6 +63,7 @@ func (ec *EmployeeController) LeaveDetails(c *gin.Context) {
 
 	leave, err := ec.employeeService.LeaveDetailsOfMembers(c.Request.Context())
 
+
 	if err != nil {
 		return
 	}

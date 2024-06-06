@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"fmt"
+	// "fmt"
 	"reflect"
 
 	// "fmt"
@@ -25,24 +25,24 @@ func NewEmployeeRepository(db *gorm.DB) *employeeRepository {
 	}
 }
 
-// func (repo employeeRepository) FindByUserId(ctx context.Context) (*[]model.Emp, error) {
-// 	var employee []model.Emp
+func (repo employeeRepository) FindNameByUserId(ctx context.Context, id int) (model.Emp, error) {
+	var employee model.Emp
 
-// 	// db := repo.WithContext(ctx)
-// 	// defer cancel()
+	// db := repo.WithContext(ctx)
+	// defer cancel()
 
-// 	if result := repo.db.Find(&employee); result.Error != nil {
-// 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-// 			return &[]model.Emp{}, nil
-// 		}
-// 		// return &model.Emp{}, ae.InternalServerError("InternalServerError","something went wrong",
-// 		// 	fmt.Errorf("something went wrong %v", result.Error))
+	if result := repo.db.Where("id = ?", id).Find(&employee); result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return model.Emp{}, nil
+		}
+		// return &model.Emp{}, ae.InternalServerError("InternalServerError","something went wrong",
+		// 	fmt.Errorf("something went wrong %v", result.Error))
 
-// 		return &[]model.Emp{}, errors.New("error occured")
-// 	}
+		return model.Emp{}, errors.New("error occured")
+	}
 
-// 	return &employee, nil
-// }
+	return employee, nil
+}
 
 func (repo employeeRepository) FetchLeavesByEmpId(ctx context.Context) (*[]model.Leave, error) {
 	var leave []model.Leave
@@ -58,6 +58,21 @@ func (repo employeeRepository) FetchLeavesByEmpId(ctx context.Context) (*[]model
 	return &leave, nil
 
 }
+
+// func (repo employeeRepository) FetchRemainingLeavesByEmpId(ctx context.Context, empid int) (*[]model.Leave, error) {
+// 	var leave []model.Leave
+
+// 	if result := repo.db.Order("start_date").Where("emp_id = ? ", empid).First(&leave); result.Error != nil {
+// 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+// 			return &[]model.Leave{}, nil
+// 		}
+
+// 		return &[]model.Leave{}, errors.New("error occurred")
+// 	}
+
+// 	return &leave, nil
+
+// }
 
 func (repo employeeRepository) Create(ctx context.Context, c *model.Leave) error {
 	dbCtx := repo.db.WithContext(ctx)
@@ -88,14 +103,12 @@ func (repo employeeRepository) FindLeave(ctx context.Context, empid int, sdate t
 
 	}
 
-	fmt.Println("in repo : ")
 
 	var emptyLeave model.Leave
 
-	fmt.Println(leave)
-
+	// record not found
 	if reflect.DeepEqual(leave, emptyLeave)  {
-		return false, errors.New("some error occurred")
+		return false, nil
 	}
 
 	return true, nil
@@ -121,5 +134,8 @@ func (repo employeeRepository) Delete(ctx context.Context, c *model.Leave, sdate
 
 
 }
+
+
+
 
 
