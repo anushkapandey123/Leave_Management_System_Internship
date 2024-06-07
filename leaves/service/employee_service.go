@@ -140,5 +140,5 @@ func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest
 
 func ValidateLeaveRequest(start_date time.Time, end_date time.Time) (bool) {
 
-	return !end_date.Before(start_date)
-}
+	return !end_date.Before(start_date) && !start_date.Before(time.Now()) && !end_date.Before(time.Now())
+ }
