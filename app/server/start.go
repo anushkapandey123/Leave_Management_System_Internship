@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	
 
 	// "github.com/gorilla/mux"
 	"main.go/config"
@@ -32,14 +31,12 @@ func Init(cfg config.AppConfig) error {
 
 	// router.HandleFunc("/details", employeeController.Detail).Methods("GET")
 	router.GET(constants.DetailEndPoint, employeeController.Detail)
-	
 
 	err := start(router, cfg.Server)
 	if err != nil {
 		return err
 	}
 	return nil
-
 
 }
 
@@ -61,7 +58,6 @@ func port(c config.ServerConfig) string {
 	return fmt.Sprintf(":%d", c.Port)
 }
 
-
 func setupApp(cfg config.AppConfig) *gin.Engine {
 	gin.SetMode(cfg.Server.GineMode)
 	engine := gin.New()
@@ -75,4 +71,3 @@ func setupMiddleware(engine *gin.Engine, cfg config.AppConfig) *gin.Engine {
 	// engine.Use(ginzap.RecoveryWithZap(logger.GetLogger(), true))
 	return engine
 }
-

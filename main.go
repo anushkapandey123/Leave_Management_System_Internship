@@ -1,13 +1,9 @@
 package main
 
 import (
-	// "errors"
-	// "errors"
 	"fmt"
-	// "flag"
-	// "fmt"
-	// "os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,68 +12,21 @@ import (
 	"main.go/leaves/model"
 	"main.go/leaves/repository"
 	"main.go/leaves/service"
-	"github.com/gin-contrib/cors"
-	// "main.go/app/server"
-	// "main.go/config"
-	// "main.go/integration_test/db"
-	// "main.go/leaves/constants"
-	// "main.go/leaves/controller"
-	// "main.go/leaves/model"
-	// "main.go/leaves/repository"
-	// "main.go/leaves/repository"
-	// "main.go/leaves/service"
+	middleware "main.go/middleware/security"
 )
 
 const (
-	configFileKey     = "configFile"
-	defaultConfigFile = ""
-	configFileUsage   = "/path/to/configfile/wrto/pwd"
+	dsn = "host=localhost user=postgres password=pass123 dbname=employee_leave_management_system port=5432 sslmode=disable"
 )
-
-// @title Booking API
-// @version 1.0
-// @description This is a skyfox
-
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
-
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @BasePath /
-//	@securityDefinitions.basic	BasicAuth
-
-// func main() {
-// 	var configFile string
-
-// 	flag.StringVar(&configFile, configFileKey, defaultConfigFile, configFileUsage)
-// 	flag.Parse()
-
-// 	cfg, err := config.LoadConfig(configFile)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-
-// 	err = server.Init(cfg)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-// }
 
 var db *gorm.DB
 
 func main() {
-    // Initialize Gin router
-    router := gin.Default()
-
+	// Initialize Gin router
+	router := gin.Default()
 	router.Use(cors.Default())
-	
 
 	// Initialize database connection
-	dsn := "host=localhost user=postgres password=pass123 dbname=employee_leave_management_system port=5432 sslmode=disable"
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -85,36 +34,32 @@ func main() {
 		return
 	}
 	fmt.Println("Database connection established")
-	fmt.Println("in main :", db)
 
-	db.AutoMigrate(&model.Emp{})
-	db.AutoMigrate(&model.Leave{})
+	// AutoMigrate the models
+	db.AutoMigrate(&model.Emp{}, &model.Leave{}, &model.User{})
 
-	
-
-	
-	
-
+	// Initialize repositories
 	employeeRepository := repository.NewEmployeeRepository(db)
+	userRepository := repository.NewUserRepository(db)
 
+	// Initialize services
 	employeeService := service.NewEmployeeService(employeeRepository)
+	userService := service.NewUserService(userRepository)
 
+	// Initialize controllers
 	employeeController := controller.NewEmployeeController(employeeService)
+	userController := controller.NewUserController(userService)
 
-	
+	// Define routes
+	router.POST(constants.InsertLeaveEndPoint, middleware.BasicAuth(userService), employeeController.Insert)
+	router.GET(constants.LeaveDetailsEndPoint, middleware.BasicAuth(userService), employeeController.LeaveDetails)
+	router.POST(constants.DeleteLeaveEndPoint, middleware.BasicAuth(userService), employeeController.Delete)
+	router.POST(constants.SignUpEndPoint, userController.SignUp)
+	router.POST(constants.LoginEndPoint, userController.Login)
 
-	router.POST(constants.InsertLeaveEndPoint, employeeController.Insert)
-
-	router.GET(constants.LeaveDetailsEndPoint, employeeController.LeaveDetails)
-
-	router.POST(constants.DeleteLeaveEndPoint, employeeController.Delete)
-	
 	// Run the server
 	err = router.Run("localhost:8080")
 	if err != nil {
 		fmt.Println("Failed to start server:", err)
 	}
 }
-
-
-
