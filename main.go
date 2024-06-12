@@ -51,9 +51,9 @@ func main() {
 	userController := controller.NewUserController(userService)
 
 	// Define routes
-	router.POST(constants.InsertLeaveEndPoint, middleware.BasicAuth(userService), employeeController.Insert)
-	router.GET(constants.LeaveDetailsEndPoint, middleware.BasicAuth(userService), employeeController.LeaveDetails)
-	router.POST(constants.DeleteLeaveEndPoint, middleware.BasicAuth(userService), employeeController.Delete)
+	router.POST(constants.InsertLeaveEndPoint, middleware.JWTAuthMiddleware(), employeeController.Insert)
+	router.GET(constants.LeaveDetailsEndPoint, middleware.JWTAuthMiddleware(), employeeController.LeaveDetails)
+	router.POST(constants.DeleteLeaveEndPoint, middleware.JWTAuthMiddleware(), employeeController.Delete)
 	router.POST(constants.SignUpEndPoint, userController.SignUp)
 	router.POST(constants.LoginEndPoint, userController.Login)
 

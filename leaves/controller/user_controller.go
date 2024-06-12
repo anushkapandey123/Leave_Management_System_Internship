@@ -7,6 +7,7 @@ import (
 	"main.go/leaves/dto/request"
 	"main.go/leaves/model"
 	"main.go/leaves/service"
+	security "main.go/middleware/security"
 )
 
 type UserController struct {
@@ -54,5 +55,11 @@ func (controller *UserController) Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	token, err := security.GenerateToken(user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"token": token})
+
 }
