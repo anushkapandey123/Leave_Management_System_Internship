@@ -12,7 +12,7 @@ import (
 	"main.go/leaves/model"
 	"main.go/leaves/repository"
 	"main.go/leaves/service"
-	middleware "main.go/middleware/security"
+	// middleware "main.go/middleware/security"
 )
 
 const (
@@ -39,15 +39,15 @@ func main() {
 	db.AutoMigrate(&model.Emp{}, &model.Leave{}, &model.User{})
 
 	// Initialize repositories
-	employeeRepository := repository.NewEmployeeRepository(db)
+	leaveRepository := repository.NewLeaveRepository(db)
 	userRepository := repository.NewUserRepository(db)
 
 	// Initialize services
-	employeeService := service.NewEmployeeService(employeeRepository)
+	leaveService := service.NewLeaveService(leaveRepository)
 	userService := service.NewUserService(userRepository)
 
 	// Initialize controllers
-	employeeController := controller.NewEmployeeController(employeeService)
+	leaveController := controller.NewLeaveController(leaveService)
 	userController := controller.NewUserController(userService)
 
 	// Define routes

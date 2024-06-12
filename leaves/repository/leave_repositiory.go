@@ -129,3 +129,27 @@ func (repo leaveRepository) GetLatestLeave(ctx context.Context, empid int) (mode
 	return leave, nil
 	
 }
+
+func (repo leaveRepository) CheckForOverlappingLeaves(ctx context.Context, date time.Time, empid int) (bool, error) {
+	var leave model.Leave
+
+	if result := repo.db.Where("start_date <= ?", date).Where("end_date >= ?", date).Where("emp_id = ?", empid).Find(&leave); result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+
+		return false, errors.New("some error occurred")
+
+	}
+
+	var emptyLeave model.Leave
+
+	// record not found
+	if reflect.DeepEqual(leave, emptyLeave) {
+		return false, nil
+	}
+
+	return true, nil
+
+
+}
