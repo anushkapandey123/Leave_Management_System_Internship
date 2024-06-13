@@ -7,6 +7,7 @@ const (
 	LeaveDetailsEndPoint = "/leave_detail"
 	LoginEndPoint        = "/login"
 	SignUpEndPoint       = "/signup"
+	TeamLeaveDetailsEndPoint = "/team_leave_detail"
 )
 
 const (

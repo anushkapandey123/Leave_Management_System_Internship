@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"reflect"
+	// "reflect"
 	"time"
 
 	"main.go/leaves/dto/request"
@@ -35,67 +35,67 @@ func NewEmployeeService(emprepo EmployeeRepository) *employeeService {
 
 
 
-func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest request.LeaveRequest) error {
-	sd := newLeaveRequest.StartDate
-	ed := newLeaveRequest.EndDate
+// func (c *employeeService) InsertLeave(ctx context.Context, newLeaveRequest request.LeaveRequest) error {
+// 	sd := newLeaveRequest.StartDate
+// 	ed := newLeaveRequest.EndDate
 
-	layout := "2006-01-02"
-	sdate, _ := time.Parse(layout, sd)
-	edate, _ := time.Parse(layout, ed)
+// 	layout := "2006-01-02"
+// 	sdate, _ := time.Parse(layout, sd)
+// 	edate, _ := time.Parse(layout, ed)
 
-	if !ValidateLeaveRequest(sdate, edate) {
-		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
-	}
+// 	if !ValidateLeaveRequest(sdate, edate) {
+// 		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
+// 	}
 
-	res , err := c.empRepo.FindLeave(ctx, newLeaveRequest.Id, sdate, edate)
+// 	res , err := c.empRepo.FindLeave(ctx, newLeaveRequest.Id, sdate, edate)
 
-	fmt.Println(res)
+// 	fmt.Println(res)
 
-	if err != nil {
-		return err
-	}
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if res == true {
+// 	if res == true {
 
-		return errors.New("leave record already exists")
-	}
+// 		return errors.New("leave record already exists")
+// 	}
 
-	emp, _ := c.empRepo.FindNameByUserId(ctx, newLeaveRequest.Id);
-	name := emp.Name;
+// 	emp, _ := c.empRepo.FindNameByUserId(ctx, newLeaveRequest.Id);
+// 	name := emp.Name;
 
 	
 
-	leave := model.Leave{EmpId: newLeaveRequest.Id, Name: name, StartDate: sdate, EndDate: edate, LeaveType: newLeaveRequest.LeaveType, PaidLeavesRemaining: 0, CasualLeavesRemaining: 0}
-	err1 := c.empRepo.Create(ctx, &leave)
-	if err1 != nil {
+// 	leave := model.Leave{EmpId: uint(newLeaveRequest.Id), Name: name, StartDate: sdate, EndDate: edate, LeaveType: newLeaveRequest.LeaveType, PaidLeavesRemaining: 0, CasualLeavesRemaining: 0}
+// 	err1 := c.empRepo.Create(ctx, &leave)
+// 	if err1 != nil {
 
-		return err1
-	}
-	return nil
-}
-
-
-func (c *employeeService) LeaveDetailsOfMembers(ctx context.Context) (*[]model.Leave, error) {
-	leave, err := c.empRepo.FetchLeavesByEmpId(ctx)
-
-	if err != nil {
-		// return nil, ae.InternalServerError("Something went wrong", " ", fmt.Errorf("%v", err))
-		return nil, errors.New("error occured")
-	}
-
-	emptyLeave := model.Leave{}
-
-	if err == nil && reflect.DeepEqual(leave, emptyLeave) {
-		err := errors.New("user does not exist")
-		// return nil, ae.BadRequestError("Bad request error", " ", fmt.Errorf("%v", err))
-		return nil, err
-	}
-
-	return leave, nil
+// 		return err1
+// 	}
+// 	return nil
+// }
 
 
+// func (c *employeeService) LeaveDetailsOfMembers(ctx context.Context) (*[]model.Leave, error) {
+// 	leave, err := c.empRepo.FetchLeavesByEmpId(ctx)
 
-}
+// 	if err != nil {
+// 		// return nil, ae.InternalServerError("Something went wrong", " ", fmt.Errorf("%v", err))
+// 		return nil, errors.New("error occured")
+// 	}
+
+// 	emptyLeave := model.Leave{}
+
+// 	if err == nil && reflect.DeepEqual(leave, emptyLeave) {
+// 		err := errors.New("user does not exist")
+// 		// return nil, ae.BadRequestError("Bad request error", " ", fmt.Errorf("%v", err))
+// 		return nil, err
+// 	}
+
+// 	return leave, nil
+
+
+
+// }
 
 func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest request.DeleteLeaveRequest) error {
 	sd := newDeleteLeaveRequest.StartDate
@@ -138,7 +138,7 @@ func (c *employeeService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest
 
 }
 
-func ValidateLeaveRequest(start_date time.Time, end_date time.Time) (bool) {
+// func ValidateLeaveRequest(start_date time.Time, end_date time.Time) (bool) {
 
-	return !end_date.Before(start_date) && !start_date.Before(time.Now()) && !end_date.Before(time.Now())
- }
+// 	return !end_date.Before(start_date) && !start_date.Before(time.Now()) && !end_date.Before(time.Now())
+//  }

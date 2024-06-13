@@ -3,8 +3,9 @@ package model
 import "time"
 
 type Leave struct {
-	EmpId     int       `json:"empid"`
+	EmpId     uint       `json:"empid"`
 	Name 	  string 	`json:"name"`
+	Email 	  string	`json:"email"`
 	StartDate time.Time `json:"startdate" gorm:"type:date"`
 	EndDate   time.Time `json:"enddate" gorm:"type:date"`
 	LeaveType string	`json:"leavetype"`

@@ -14,7 +14,7 @@ type Claims struct {
 }
 
 func GenerateToken(email string) (string, error) {
-	expirationTime := time.Now().Add(15 * time.Minute)
+	expirationTime := time.Now().Add(35 * time.Minute)
 	claims := &Claims{
 		Email: email,
 		StandardClaims: jwt.StandardClaims{

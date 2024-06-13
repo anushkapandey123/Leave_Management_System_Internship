@@ -20,6 +20,12 @@ type LeaveRepository interface {
 	Delete(context.Context, *model.Leave, time.Time, time.Time) error
 	GetLatestLeave(context.Context, int) (model.Leave, error)
 	CheckForOverlappingLeaves(context.Context, time.Time, int) (bool, error)
+	FetchLeavesByEmailId(context.Context, any) (*[]model.Leave, error)
+	FindLeaveNew(context.Context, any, time.Time, time.Time) (bool, error)
+	GetLatestLeaveNew(context.Context, any) (model.Leave, error)
+	CheckForOverlappingLeavesNew(context.Context, time.Time, any) (bool, error)
+	FindNameByEmail(context.Context, any) (model.User, error)
+
 	// FindLeaveInARange(context.Context, int, time.Time, time.Time) (bool, error)
 
 }
@@ -34,90 +40,89 @@ func NewLeaveService(leaverepo LeaveRepository) *leaveService {
 	}
 }
 
-func (c *leaveService) InsertLeave(ctx context.Context, newLeaveRequest request.LeaveRequest) error {
-	sd := newLeaveRequest.StartDate
-	ed := newLeaveRequest.EndDate
+// func (c *leaveService) InsertLeave(ctx context.Context, newLeaveRequest request.LeaveRequest) error {
+// 	sd := newLeaveRequest.StartDate
+// 	ed := newLeaveRequest.EndDate
 
-	layout := "2006-01-02"
-	sdate, _ := time.Parse(layout, sd)
-	edate, _ := time.Parse(layout, ed)
+// 	layout := "2006-01-02"
+// 	sdate, _ := time.Parse(layout, sd)
+// 	edate, _ := time.Parse(layout, ed)
 
-	if !ValidateLeaveRequest(sdate, edate) {
-		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
-	}
+// 	if !ValidateLeaveRequest(sdate, edate) {
+// 		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
+// 	}
 
-	res, err := c.leaveRepo.FindLeave(ctx, newLeaveRequest.Id, sdate, edate)
+// 	res, err := c.leaveRepo.FindLeave(ctx, newLeaveRequest.Id, sdate, edate)
 
-	fmt.Println(res)
+// 	fmt.Println(res)
 
-	if err != nil {
-		return err
-	}
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if res == true {
+// 	if res == true {
 
-		return errors.New("leave record already exists")
-	}
+// 		return errors.New("leave record already exists")
+// 	}
 
-	// find duration of leave
-	// duration := int(edate.Sub(sdate).Hours() / 24) + 1
+	
 
-	paid_leave := 25
-	casual_leave := 25
+// 	paid_leave := 25
+// 	casual_leave := 25
 
-	// only considering weekdays
-	duration := CountWeekDays(edate, sdate)
+// 	// only considering weekdays
+// 	duration := CountWeekDays(edate, sdate)
 
-	latestLeave, err := c.leaveRepo.GetLatestLeave(ctx, newLeaveRequest.Id)
+// 	latestLeave, err := c.leaveRepo.GetLatestLeave(ctx, newLeaveRequest.Id)
 
-	emptyLeave := model.Leave{}
+// 	emptyLeave := model.Leave{}
 
-	if err != nil {
+// 	if err != nil {
 
-		return errors.New("server error")
+// 		return errors.New("server error")
 
-	} else if reflect.DeepEqual(emptyLeave, latestLeave) {
+// 	} else if reflect.DeepEqual(emptyLeave, latestLeave) {
 
-		paid_leave, casual_leave, err = CalculateRemainingLeaves(newLeaveRequest, paid_leave, casual_leave, duration)
+// 		paid_leave, casual_leave, err = CalculateRemainingLeaves(newLeaveRequest, paid_leave, casual_leave, duration)
 
-		if err != nil {
-			return errors.New("cannot apply for leaves, duration exceeds max limit")
-		}
+// 		if err != nil {
+// 			return errors.New("cannot apply for leaves, duration exceeds max limit")
+// 		}
 
-	} else {
+// 	} else {
 
-		paid_leave, casual_leave, err = CalculateRemainingLeaves(newLeaveRequest, latestLeave.PaidLeavesRemaining, latestLeave.CasualLeavesRemaining, duration)
+// 		paid_leave, casual_leave, err = CalculateRemainingLeaves(newLeaveRequest, latestLeave.PaidLeavesRemaining, latestLeave.CasualLeavesRemaining, duration)
 
-		if err != nil {
-			return errors.New("cannot apply for leaves, duration exceeds max limit")
-		}
-	}
+// 		if err != nil {
+// 			return errors.New("cannot apply for leaves, duration exceeds max limit")
+// 		}
+// 	}
 
-	//check for overlapping leaves
-	resOverlapStartDate, errOverlapStartDate := c.leaveRepo.CheckForOverlappingLeaves(ctx, sdate, newLeaveRequest.Id)
-	fmt.Println("overlaping start date : ", resOverlapStartDate)
+// 	//check for overlapping leaves
+// 	resOverlapStartDate, errOverlapStartDate := c.leaveRepo.CheckForOverlappingLeaves(ctx, sdate, newLeaveRequest.Id)
+// 	fmt.Println("overlaping start date : ", resOverlapStartDate)
 
-	resOverlapEndDate, errOverlapEndDate := c.leaveRepo.CheckForOverlappingLeaves(ctx, edate, newLeaveRequest.Id)
-	fmt.Println("overlaping end date : ", resOverlapEndDate)
+// 	resOverlapEndDate, errOverlapEndDate := c.leaveRepo.CheckForOverlappingLeaves(ctx, edate, newLeaveRequest.Id)
+// 	fmt.Println("overlaping end date : ", resOverlapEndDate)
 
-	if resOverlapStartDate || resOverlapEndDate {
+// 	if resOverlapStartDate || resOverlapEndDate {
 
-		return errors.New("leaves are overlapping")
-	} else if errOverlapStartDate != nil || errOverlapEndDate != nil {
-		return errors.New("leaves are overlapping")
-	}
+// 		return errors.New("leaves are overlapping")
+// 	} else if errOverlapStartDate != nil || errOverlapEndDate != nil {
+// 		return errors.New("leaves are overlapping")
+// 	}
 
-	emp, _ := c.leaveRepo.FindNameByUserId(ctx, newLeaveRequest.Id)
-	name := emp.Name
+// 	emp, _ := c.leaveRepo.FindNameByUserId(ctx, newLeaveRequest.Id)
+// 	name := emp.Name
 
-	leave := model.Leave{EmpId: newLeaveRequest.Id, Name: name, StartDate: sdate, EndDate: edate, LeaveType: newLeaveRequest.LeaveType, PaidLeavesRemaining: paid_leave, CasualLeavesRemaining: casual_leave}
-	err1 := c.leaveRepo.Create(ctx, &leave)
-	if err1 != nil {
+// 	leave := model.Leave{EmpId: uint(newLeaveRequest.Id), Name: name, StartDate: sdate, EndDate: edate, LeaveType: newLeaveRequest.LeaveType, PaidLeavesRemaining: paid_leave, CasualLeavesRemaining: casual_leave}
+// 	err1 := c.leaveRepo.Create(ctx, &leave)
+// 	if err1 != nil {
 
-		return err1
-	}
-	return nil
-}
+// 		return err1
+// 	}
+// 	return nil
+// }
 
 func (c *leaveService) LeaveDetailsOfMembers(ctx context.Context) (*[]model.Leave, error) {
 	leave, err := c.leaveRepo.FetchLeavesByEmpId(ctx)
@@ -172,6 +177,125 @@ func (c *leaveService) DeleteLeave(ctx context.Context, newDeleteLeaveRequest re
 	return err
 
 }
+
+
+func (c *leaveService) LeaveDetailsOfMembersNew(ctx context.Context, email any) (*[]model.Leave, error) {
+
+	leave, err := c.leaveRepo.FetchLeavesByEmailId(ctx, email)
+
+	if err != nil {
+
+		return nil, errors.New("error occured")
+	}
+
+	emptyLeave := model.Leave{}
+
+	if err == nil && reflect.DeepEqual(leave, emptyLeave) {
+		err := errors.New("user does not exist")
+		return nil, err
+	}
+
+	return leave, nil
+
+
+}
+
+
+func (c *leaveService) InsertLeaveNew(ctx context.Context, newLeaveRequest request.LeaveRequest, email any) (error) {
+
+
+	sd := newLeaveRequest.StartDate
+	ed := newLeaveRequest.EndDate
+
+	layout := "2006-01-02"
+	sdate, _ := time.Parse(layout, sd)
+	edate, _ := time.Parse(layout, ed)
+
+	if !ValidateLeaveRequest(sdate, edate) {
+		return errors.New("bad request, end date of the leave cannot be less than start date of the leave")
+	}
+
+	res, err := c.leaveRepo.FindLeaveNew(ctx, email, sdate, edate)
+
+	fmt.Println(res)
+
+	if err != nil {
+		return err
+	}
+
+	if res == true {
+
+		return errors.New("leave record already exists")
+	}
+
+	
+
+	paid_leave := 25
+	casual_leave := 25
+
+	// only considering weekdays
+	duration := CountWeekDays(edate, sdate)
+
+	latestLeave, err := c.leaveRepo.GetLatestLeaveNew(ctx, email)
+
+	emptyLeave := model.Leave{}
+
+	if err != nil {
+
+		return errors.New("server error")
+
+	} else if reflect.DeepEqual(emptyLeave, latestLeave) {
+
+		paid_leave, casual_leave, err = CalculateRemainingLeaves(newLeaveRequest, paid_leave, casual_leave, duration)
+
+		if err != nil {
+			return errors.New("cannot apply for leaves, duration exceeds max limit")
+		}
+
+	} else {
+
+		paid_leave, casual_leave, err = CalculateRemainingLeaves(newLeaveRequest, latestLeave.PaidLeavesRemaining, latestLeave.CasualLeavesRemaining, duration)
+
+		if err != nil {
+			return errors.New("cannot apply for leaves, duration exceeds max limit")
+		}
+	}
+
+	//check for overlapping leaves
+	resOverlapStartDate, errOverlapStartDate := c.leaveRepo.CheckForOverlappingLeavesNew(ctx, sdate, email)
+	fmt.Println("overlaping start date : ", resOverlapStartDate)
+
+	resOverlapEndDate, errOverlapEndDate := c.leaveRepo.CheckForOverlappingLeavesNew(ctx, edate, email)
+	fmt.Println("overlaping end date : ", resOverlapEndDate)
+
+	if resOverlapStartDate || resOverlapEndDate {
+
+		return errors.New("leaves are overlapping")
+	} else if errOverlapStartDate != nil || errOverlapEndDate != nil {
+		return errors.New("leaves are overlapping")
+	}
+
+	user, _ := c.leaveRepo.FindNameByEmail(ctx, email)
+	name := user.Name
+	id := user.ID
+	
+
+	leave := model.Leave{EmpId: id, Name: name, StartDate: sdate, EndDate: edate, LeaveType: newLeaveRequest.LeaveType, PaidLeavesRemaining: paid_leave, CasualLeavesRemaining: casual_leave, Email: user.Email}
+	err1 := c.leaveRepo.Create(ctx, &leave)
+	if err1 != nil {
+
+		return err1
+	}
+	return nil
+
+}
+
+
+
+
+
+
+
 
 func ValidateLeaveRequest(start_date time.Time, end_date time.Time) bool {
 
