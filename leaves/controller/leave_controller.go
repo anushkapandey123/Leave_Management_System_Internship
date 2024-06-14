@@ -20,7 +20,7 @@ type LeaveService interface {
 	LeaveDetailsOfMembers(context.Context) (*[]model.Leave, error)
 	DeleteLeave(context.Context, request.DeleteLeaveRequest) error
 	LeaveDetailsOfMembersNew(context.Context, any) (*[]model.Leave, error)
-	InsertLeaveNew(context.Context, request.LeaveRequest, any) (error)
+	InsertLeave(context.Context, request.LeaveRequest, any) (error)
 }
 
 type LeaveController struct {
@@ -33,29 +33,7 @@ func NewLeaveController(leaveservice LeaveService) *LeaveController {
 	}
 }
 
-// func (ec *LeaveController) Insert(c *gin.Context) {
-// 	var newLeaveRequest request.LeaveRequest
 
-// 	fmt.Println("inside controller")
-
-// 	if err := c.BindJSON(&newLeaveRequest); err != nil {
-// 		errors.New("error occured, bad request")
-// 		c.AbortWithStatus(404)
-// 	}
-
-// 	fmt.Println(newLeaveRequest)
-
-// 	responseError := ec.leaveService.InsertLeave(c.Request.Context(), newLeaveRequest)
-
-// 	if responseError != nil {
-
-// 		errors.New("insertion failed")
-// 		c.AbortWithStatus(404)
-
-// 	}
-// 	c.JSON(http.StatusOK, "Leave Insertion Successful")
-
-// }
 
 func (ec *LeaveController) LeaveDetails(c *gin.Context) {
 	// fmt.Println(middleware.JWTAuthMiddleware())
@@ -105,7 +83,7 @@ func (ec *LeaveController) LeaveDetailsNew(c *gin.Context) {
 
 }
 
-func (ec *LeaveController) InsertNew(c *gin.Context) {
+func (ec *LeaveController) Insert(c *gin.Context) {
 	var newLeaveRequest request.LeaveRequest
 	email := c.MustGet("email")
 	fmt.Println("inside controller")
@@ -117,7 +95,7 @@ func (ec *LeaveController) InsertNew(c *gin.Context) {
 
 	fmt.Println(newLeaveRequest)
 
-	responseError := ec.leaveService.InsertLeaveNew(c.Request.Context(), newLeaveRequest, email)
+	responseError := ec.leaveService.InsertLeave(c.Request.Context(), newLeaveRequest, email)
 
 	if responseError != nil {
 

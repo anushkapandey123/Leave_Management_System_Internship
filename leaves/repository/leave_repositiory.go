@@ -15,6 +15,8 @@ import (
 	"main.go/leaves/model"
 )
 
+
+
 type leaveRepository struct {
 	db *gorm.DB
 }
@@ -111,22 +113,6 @@ func (repo leaveRepository) Delete(ctx context.Context, c *model.Leave, sdate ti
 
 }
 
-func (repo leaveRepository) GetLatestLeave(ctx context.Context, empid int) (model.Leave, error) {
-
-	var leave model.Leave
-
-	if result := repo.db.Order("start_date desc").Where("emp_id = ?", empid).First(&leave); result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return leave, nil
-		}
-
-		return leave, errors.New("some error occurred")
-
-	}
-
-	return leave, nil
-
-}
 
 func (repo leaveRepository) CheckForOverlappingLeaves(ctx context.Context, date time.Time, empid int) (bool, error) {
 	var leave model.Leave
@@ -141,7 +127,7 @@ func (repo leaveRepository) CheckForOverlappingLeaves(ctx context.Context, date 
 	}
 
 	var emptyLeave model.Leave
-
+	
 	// record not found
 	if reflect.DeepEqual(leave, emptyLeave) {
 		return false, nil
@@ -167,7 +153,7 @@ func (repo leaveRepository) FetchLeavesByEmailId(ctx context.Context, email any)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-func (repo leaveRepository) FindLeaveNew(ctx context.Context, email any, sdate time.Time, edate time.Time) (bool, error) {
+func (repo leaveRepository) FindLeaveByEmailId(ctx context.Context, email any, sdate time.Time, edate time.Time) (bool, error) {
 
 	var leave model.Leave
 
@@ -190,7 +176,7 @@ func (repo leaveRepository) FindLeaveNew(ctx context.Context, email any, sdate t
 	return true, nil
 }
 
-func (repo leaveRepository) GetLatestLeaveNew(ctx context.Context, email any) (model.Leave, error) {
+func (repo leaveRepository) GetLatestLeave(ctx context.Context, email any) (model.Leave, error) {
 
 	var leave model.Leave
 
