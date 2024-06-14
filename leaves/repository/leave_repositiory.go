@@ -151,7 +151,7 @@ func (repo leaveRepository) FetchLeavesByEmailId(ctx context.Context, email any)
 	return &leave, nil
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 func (repo leaveRepository) FindLeaveByEmailId(ctx context.Context, email any, sdate time.Time, edate time.Time) (bool, error) {
 
@@ -176,7 +176,7 @@ func (repo leaveRepository) FindLeaveByEmailId(ctx context.Context, email any, s
 	return true, nil
 }
 
-func (repo leaveRepository) GetLatestLeave(ctx context.Context, email any) (model.Leave, error) {
+func (repo leaveRepository) GetLatestLeaveByEmail(ctx context.Context, email any) (model.Leave, error) {
 
 	var leave model.Leave
 

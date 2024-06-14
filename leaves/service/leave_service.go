@@ -21,7 +21,7 @@ type LeaveRepository interface {
 	CheckForOverlappingLeaves(context.Context, time.Time, int) (bool, error)
 	FetchLeavesByEmailId(context.Context, any) (*[]model.Leave, error)
 	FindLeaveByEmailId(context.Context, any, time.Time, time.Time) (bool, error)
-	GetLatestLeave(context.Context, any) (model.Leave, error)
+	GetLatestLeaveByEmail(context.Context, any) (model.Leave, error)
 	CheckForOverlappingLeavesNew(context.Context, time.Time, any) (bool, error)
 	FindNameByEmail(context.Context, any) (model.User, error)
 
@@ -151,7 +151,7 @@ func (c *leaveService) InsertLeave(ctx context.Context, newLeaveRequest request.
 	// only considering weekdays
 	duration := CountWeekDays(edate, sdate)
 
-	latestLeave, err := c.leaveRepo.GetLatestLeave(ctx, email)
+	latestLeave, err := c.leaveRepo.GetLatestLeaveByEmail(ctx, email)
 
 	emptyLeave := model.Leave{}
 

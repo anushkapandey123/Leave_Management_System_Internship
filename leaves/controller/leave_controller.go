@@ -16,7 +16,6 @@ import (
 )
 
 type LeaveService interface {
-	// InsertLeave(context.Context, request.LeaveRequest) error
 	LeaveDetailsOfMembers(context.Context) (*[]model.Leave, error)
 	DeleteLeave(context.Context, request.DeleteLeaveRequest) error
 	LeaveDetailsOfMembersNew(context.Context, any) (*[]model.Leave, error)
